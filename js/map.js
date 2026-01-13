@@ -2,14 +2,14 @@
 
 const PROJECT = {
   initialCenter: [43.726, -79.390],
-  initialZoom: 11,
+  initialZoom: 12,
   minZoom: 10,
   tileUrl: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
   tileOptions: {
     maxZoom: 19,
     minZoom: 10,
     attribution:
-      '&copy; OpenStreetMap contributors | Data: SEA (curation), City of Toronto Open Data Portal, Statistics Canada',
+      '&copy; OpenStreetMap contributors | Data: SEA',
   },
   panes: [
     { name: "basePolys", zIndex: 250 },
@@ -71,11 +71,10 @@ function buildPopupHTML(cfg, props) {
 
 // -------- LAYER CONFIGS (edit these per project) --------
 const LAYER_CONFIGS = [
-  // Example: grocery points
   {
     id: "groceries",
     name: "Ethnic Grocery Stores",
-    url: "data/ethnic-groceries.geojson",
+    url: "data/ethnic-grocery.geojson",
     defaultVisible: true,
     pane: "points",
 
@@ -88,9 +87,9 @@ const LAYER_CONFIGS = [
       }),
 
     popup: {
-      title: (p) => p.store_name || p.name || "Grocery Store",
+      title: (p) => p.store_name || p.Name || "Grocery Store",
       fields: [
-        { field: "category", label: "Category" },
+        { field: "description", label: "Category" },
         { field: "address", label: "Address" },
         { field: "neighbourhood", label: "Neighbourhood" },
         { field: "languages", label: "Languages" },
