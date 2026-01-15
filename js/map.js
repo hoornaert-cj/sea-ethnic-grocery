@@ -70,6 +70,22 @@ function buildPopupHTML(cfg, props) {
 }
 
 //----ADD CANONICAL STORE HERE----//
+function cleanValue (v) {
+  if(v==null) return null;
+  const s = String(v).trim();
+  if(!s) return NULL;
+  if(s.toLowerCase() ==='none') return null;
+}
+
+function firstNonEmpty(...vals) {
+  for(const v of vals) {
+    const cleaned = cleanValue(v);
+    if(cleaned) return cleaned;
+  }
+  return null;
+}
+
+
 
 // -------- LAYER CONFIGS (edit these per project) --------
 const LAYER_CONFIGS = [
