@@ -69,6 +69,8 @@ function buildPopupHTML(cfg, props) {
   return html || "No attributes";
 }
 
+//----ADD CANONICAL STORE HERE----//
+
 // -------- LAYER CONFIGS (edit these per project) --------
 const LAYER_CONFIGS = [
   {
