@@ -40,6 +40,34 @@ function formatValue(val, decimals = 1) {
   return isNaN(n) ? String(val) : n.toFixed(decimals);
 }
 
+function esc(s) {
+  if (s == null) return "";
+  return String(s)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+
+
+//----ADD CANONICAL STORE HERE----//
+function cleanValue (v) {
+  if(v==null) return null;
+  const s = String(v).trim();
+  if(!s) return NULL;
+  if(s.toLowerCase() ==='none') return null;
+}
+
+function firstNonEmpty(...vals) {
+  for(const v of vals) {
+    const cleaned = cleanValue(v);
+    if(cleaned) return cleaned;
+  }
+  return null;
+}
+
 function buildPopupHTML(cfg, props) {
   let html = "";
 
@@ -68,24 +96,6 @@ function buildPopupHTML(cfg, props) {
 
   return html || "No attributes";
 }
-
-//----ADD CANONICAL STORE HERE----//
-function cleanValue (v) {
-  if(v==null) return null;
-  const s = String(v).trim();
-  if(!s) return NULL;
-  if(s.toLowerCase() ==='none') return null;
-}
-
-function firstNonEmpty(...vals) {
-  for(const v of vals) {
-    const cleaned = cleanValue(v);
-    if(cleaned) return cleaned;
-  }
-  return null;
-}
-
-
 
 // -------- LAYER CONFIGS (edit these per project) --------
 const LAYER_CONFIGS = [
