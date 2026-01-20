@@ -79,43 +79,6 @@ body {
   background-color: #747575;
 }
 
-.ward-marker {
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1rem;
-  font-weight: 600;
-  border: 1px solid rgba(0,0,0,0.4);
-  box-shadow: 0 0 2px rgba(0,0,0,0.5);
-  opacity: 0.9;
-}
-
-/* .ward-label {
-  pointer-events: none;
-  background: none;
-} */
-
-.ward-name-label {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  padding: 2px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  pointer-events: none;
-  opacity: 0.75;
-}
-
-.ward-name-label span {
-  background: rgba(255, 255, 255, 0.65);
-  color: #111;
-  /* border: 1px solid rgba(0, 0, 0, 0.25); */
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.25);
-}
-
 .layer-note {
   font-size: 11px;
   color: #555;
@@ -136,12 +99,6 @@ body {
   display: none;
 }
 
-.layer-note {
-  font-size: 0.8rem;
-  color: #555;
-  margin-top: 0.5rem;
-  line-height: 1.3;
-}
 
 @media (max-width: 48em) {
   .layer-legend {
@@ -174,5 +131,90 @@ body {
     box-shadow: 0 1px 4px rgba(0,0,0,0.3);
     color: #333;
   }
+}
+
+
+/*---- Style the popups ----*/
+/* Make Leaflet popups feel like a card */
+.leaflet-popup-content {
+  margin: 12px 14px;
+}
+
+.popup-card {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  max-width: 340px;
+}
+
+.popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.popup-title {
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 1.15;
+}
+
+.popup-flag {
+  width: 34px;
+  height: 22px;
+  object-fit: cover;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+}
+
+.popup-subtitle {
+  color: #444;
+  margin: 6px 0 10px;
+}
+
+.popup-section {
+  margin: 10px 0;
+}
+
+.popup-label {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.popup-text {
+  color: #222;
+  line-height: 1.35;
+}
+
+.popup-row {
+  margin: 6px 0;
+}
+
+.popup-row a {
+  text-decoration: underline;
+}
+
+.popup-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.popup-photo img {
+  width: 96px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.popup-directions {
+  display: inline-block;
+  padding: 8px 10px;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
 }
 

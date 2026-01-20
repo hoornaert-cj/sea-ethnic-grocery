@@ -40,6 +40,13 @@ function formatValue(val, decimals = 1) {
   return isNaN(n) ? String(val) : n.toFixed(decimals);
 }
 
+function linkRow(label, url, text = null) {
+  if (!url) return "";
+  const safeUrl = esc(url);
+  const safeText = esc(text || label);
+  return `<div class="popup-row"><a href="${safeUrl}" target="_blank" rel="noopener">${safeText}</a></div>`;
+}
+
 function esc(s) {
   if (s == null) return "";
   return String(s)
@@ -68,33 +75,64 @@ function firstNonEmpty(...vals) {
   return null;
 }
 
-function buildPopupHTML(cfg, props) {
-  let html = "";
+function buildGroceryPopupHTML(p) {
+  const name = p.store_name_final ? esc(p.store_name_final) : "Grocery Store";
+  const region = p.region ? esc(p.region) : null;
 
-  if (cfg.popup?.title) {
-    const title =
-      typeof cfg.popup.title === "function"
-        ? cfg.popup.title(props)
-        : props[cfg.popup.title];
-    if (title) html += `<strong>${title}</strong><br>`;
-  }
+  // Optional: show an icon/flag image if you have icons/<icon_key>.png
+  const iconKey = p.icon_key ? esc(p.icon_key) : null;
+  const iconHtml = iconKey
+    ? `<img class="popup-flag" src="icons/${iconKey}.png" alt="${iconKey}">`
+    : "";
 
-  const fields = cfg.popup?.fields || [];
-  fields.forEach((f) => {
-    const raw = props[f.field];
-    if (raw == null) return;
+  // Recipes: if recipes_out is already nice, show as-is.
+  // (Later we can parse into clickable list if you want.)
+  const recipes = p.recipes_out ? esc(p.recipes_out) : null;
 
-    const value =
-      f.format === "number"
-        ? formatValue(raw, f.decimals ?? 1)
-        : String(raw);
+  const flyer = p.flyer_url_final || null;
+  const ordering = p.ordering_url || null;
+  const directions = p.directions_url || null;
 
-    if (value != null) {
-      html += `${f.label}: ${value}${f.suffix || ""}<br>`;
-    }
-  });
+  const notes = p.notes_final ? esc(p.notes_final) : null;
 
-  return html || "No attributes";
+  // Photo (optional)
+  const photo = p.photo_url || null;
+  const photoHtml = photo
+    ? `<div class="popup-photo"><img src="${esc(photo)}" alt="${name}"></div>`
+    : "";
+
+  return `
+    <div class="popup-card">
+      <div class="popup-header">
+        <div class="popup-title">${name}</div>
+        ${iconHtml}
+      </div>
+
+      ${region ? `<div class="popup-subtitle">Region: <span>${region}</span></div>` : ""}
+
+      ${recipes ? `<div class="popup-section">
+        <div class="popup-label">Recipes</div>
+        <div class="popup-text">${recipes}</div>
+      </div>` : ""}
+
+      <div class="popup-section">
+        ${linkRow("Flyers", flyer)}
+        ${linkRow("Ordering", ordering)}
+      </div>
+
+      ${notes ? `<div class="popup-section">
+        <div class="popup-label">Notes</div>
+        <div class="popup-text">${notes}</div>
+      </div>` : ""}
+
+      <div class="popup-footer">
+        ${photoHtml}
+        ${directions ? `<a class="popup-directions" href="${esc(directions)}" target="_blank" rel="noopener">
+          Get directions
+        </a>` : ""}
+      </div>
+    </div>
+  `;
 }
 
 // -------- LAYER CONFIGS (edit these per project) --------
@@ -150,8 +188,8 @@ function styleForFeature(feature, cfg) {
 function onEachFeature(feature, layer, cfg) {
   const props = feature.properties;
   if (!props) return;
-  const html = buildPopupHTML(cfg, props);
-  layer.bindPopup(html);
+  const html = buildGroceryPopupHTML(props);
+  layer.bindPopup(html, { maxWidth: 320 });
 }
 
 // -------- Legend UI --------
