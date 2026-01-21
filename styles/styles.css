@@ -136,85 +136,86 @@ body {
 
 /*---- Style the popups ----*/
 /* Make Leaflet popups feel like a card */
-.leaflet-popup-content {
-  margin: 12px 14px;
+.sea-card{
+  font-family: Georgia, "Times New Roman", serif;
+  width: 22.5rem;
+  overflow: hidden;
 }
 
-.popup-card {
+.sea-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.sea-title{
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  max-width: 340px;
+  font-weight: 900;
+  font-size: 1.75rem;
+  line-height: 1.0;
 }
 
-.popup-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
-.popup-title {
-  font-weight: 800;
-  font-size: 18px;
-  line-height: 1.15;
-}
-
-.popup-flag {
-  width: 34px;
-  height: 22px;
+.popup-flag{
+  width: 42px;
+  height: 28px;
   object-fit: cover;
   border-radius: 3px;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
 }
 
-.popup-subtitle {
-  color: #444;
-  margin: 6px 0 10px;
+.sea-rows{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
 }
 
-.popup-section {
-  margin: 10px 0;
+.sea-row{
+  display:grid;
+  grid-template-columns: 95px 1fr;
+  column-gap: 14px;
+  align-items:start;
+  min-width: 0;
 }
 
-.popup-label {
-  font-weight: 700;
-  margin-bottom: 4px;
+.sea-label{
+  font-weight: 800;
+  font-size: 1.375rem;
 }
 
-.popup-text {
-  color: #222;
-  line-height: 1.35;
+.sea-value{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 22px;
+  line-height: 1.25;
 }
 
-.popup-row {
-  margin: 6px 0;
-}
-
-.popup-row a {
+.sea-value a{
+  color: #4aa9b5;
   text-decoration: underline;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
-.popup-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 12px;
+.sea-notes{
+  color:#111;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
-.popup-photo img {
-  width: 96px;
-  height: 64px;
-  object-fit: cover;
-  border-radius: 6px;
+.sea-footer{
+  margin-top: 16px;
 }
 
-.popup-directions {
-  display: inline-block;
-  padding: 8px 10px;
-  border: 1px solid rgba(0,0,0,0.2);
+.sea-directions{
+  display:inline-block;
+  margin-top: 6px;
+  padding: 10px 14px;
   border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.15);
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 700;
+  color: #2c7ea1;
+  background: rgba(44,126,161,0.08);
 }
 

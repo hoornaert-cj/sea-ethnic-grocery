@@ -57,6 +57,28 @@ function esc(s) {
     .replaceAll("'", "&#39;");
 }
 
+function renderRecipeLinks(raw) {
+  // Split on newlines if present, otherwise try to split on "http"
+  const text = raw.replace(/\r/g, "").trim();
+  if (!text) return "";
+
+  // If you already have newline-separated recipes, this works great.
+  const lines = text.includes("\n")
+    ? text.split("\n")
+    : text.split(/(?=https?:\/\/)/g).map(s => s.trim()); // crude fallback
+
+  const items = [];
+
+  for (const line of lines) {
+    const m = line.match(/^(.*?)(https?:\/\/\S+)\s*$/);
+    if (!m) continue;
+    const title = esc(m[1].replace(/[:\-–]\s*$/, "").trim() || "Recipe");
+    const url = esc(m[2].trim());
+    items.push(`<div class="sea-recipe"><a href="${url}" target="_blank" rel="noopener">${title}</a></div>`);
+  }
+
+  return items.join("");
+}
 
 
 //----ADD CANONICAL STORE HERE----//
@@ -77,63 +99,69 @@ function firstNonEmpty(...vals) {
 
 function buildGroceryPopupHTML(p) {
   const name = p.store_name_final ? esc(p.store_name_final) : "Grocery Store";
-  const region = p.region ? esc(p.region) : null;
 
-  // Optional: show an icon/flag image if you have icons/<icon_key>.png
+  const regionText = p.region ? esc(p.region) : null;
+
   const iconKey = p.icon_key ? esc(p.icon_key) : null;
   const iconHtml = iconKey
     ? `<img class="popup-flag" src="icons/${iconKey}.png" alt="${iconKey}">`
     : "";
 
-  // Recipes: if recipes_out is already nice, show as-is.
-  // (Later we can parse into clickable list if you want.)
-  const recipes = p.recipes_out ? esc(p.recipes_out) : null;
+  const recipesRaw = p.recipes_out ? String(p.recipes_out) : "";
+  const recipesHtml = recipesRaw ? renderRecipeLinks(recipesRaw) : "";
 
   const flyer = p.flyer_url_final || null;
   const ordering = p.ordering_url || null;
   const directions = p.directions_url || null;
 
-  const notes = p.notes_final ? esc(p.notes_final) : null;
-
-  // Photo (optional)
-  const photo = p.photo_url || null;
-  const photoHtml = photo
-    ? `<div class="popup-photo"><img src="${esc(photo)}" alt="${name}"></div>`
-    : "";
+  const notes = p.notes_final ? esc(p.notes_final) : "";
 
   return `
-    <div class="popup-card">
-      <div class="popup-header">
-        <div class="popup-title">${name}</div>
+    <div class="sea-card">
+      <div class="sea-header">
+        <div class="sea-title">${name}</div>
         ${iconHtml}
       </div>
 
-      ${region ? `<div class="popup-subtitle">Region: <span>${region}</span></div>` : ""}
+      <div class="sea-rows">
+        ${regionText ? rowHTML("Region:", `<span class="sea-linkish">${regionText}</span>`) : ""}
 
-      ${recipes ? `<div class="popup-section">
-        <div class="popup-label">Recipes</div>
-        <div class="popup-text">${recipes}</div>
-      </div>` : ""}
+        ${recipesHtml ? rowHTML("Recipes:", recipesHtml) : ""}
 
-      <div class="popup-section">
-        ${linkRow("Flyers", flyer)}
-        ${linkRow("Ordering", ordering)}
+        ${(flyer || ordering) ? rowHTML("Website:", `
+          ${flyer ? `<div>${anchor("Flyers", flyer)}</div>` : ""}
+          ${ordering ? `<div>${anchor("Ordering", ordering)}</div>` : ""}
+        `) : ""}
+
+        ${notes ? rowHTML("Notes:", `<div class="sea-notes">${notes}</div>`) : ""}
       </div>
 
-      ${notes ? `<div class="popup-section">
-        <div class="popup-label">Notes</div>
-        <div class="popup-text">${notes}</div>
-      </div>` : ""}
-
-      <div class="popup-footer">
-        ${photoHtml}
-        ${directions ? `<a class="popup-directions" href="${esc(directions)}" target="_blank" rel="noopener">
-          Get directions
-        </a>` : ""}
-      </div>
+      ${directions ? `
+        <div class="sea-footer">
+          <a class="sea-directions" href="${esc(directions)}" target="_blank" rel="noopener">
+            Get Directions
+          </a>
+        </div>
+      ` : ""}
     </div>
   `;
 }
+
+function rowHTML(label, contentHtml) {
+  return `
+    <div class="sea-row">
+      <div class="sea-label">${label}</div>
+      <div class="sea-value">${contentHtml}</div>
+    </div>
+  `;
+}
+
+function anchor(text, url) {
+  const safeUrl = esc(url);
+  const safeText = esc(text);
+  return `<a href="${safeUrl}" target="_blank" rel="noopener">${safeText}</a>`;
+}
+
 
 // -------- LAYER CONFIGS (edit these per project) --------
 const LAYER_CONFIGS = [
