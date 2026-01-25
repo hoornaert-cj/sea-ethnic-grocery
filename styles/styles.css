@@ -138,8 +138,13 @@ body {
 /* Make Leaflet popups feel like a card */
 .sea-card{
   font-family: Georgia, "Times New Roman", serif;
-  width: 22.5rem;
+  max-width: 16.25rem;
   overflow: hidden;
+}
+
+.sea-card * {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .sea-header{
@@ -193,8 +198,6 @@ body {
   color: #4aa9b5;
   text-decoration: underline;
   font-weight: 500;
-  overflow-wrap: anywhere;
-  word-break: break-word;
 }
 
 .sea-notes{
