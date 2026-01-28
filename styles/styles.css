@@ -164,7 +164,7 @@ body {
 
 .popup-flag{
   width: 42px;
-  height: 28px;
+  height: 42px;
   object-fit: cover;
   border-radius: 3px;
 }
@@ -220,5 +220,24 @@ body {
   font-weight: 700;
   color: #2c7ea1;
   background: rgba(44,126,161,0.08);
+}
+
+/* divIcon wrapper should be invisible */
+.store-divicon {
+  background: none;
+  border: none;
+}
+
+/* the actual image */
+.store-icon-img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: block;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.22);
+}
+
+.store-icon-img:hover {
+  transform: scale(1.08);
 }
 

@@ -1,7 +1,7 @@
 // js/map.js
 
 const PROJECT = {
-  initialCenter: [43.726, -79.390],
+  initialCenter: [43.7766, -79.2318],
   initialZoom: 12,
   minZoom: 10,
   tileUrl: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -57,6 +57,28 @@ function esc(s) {
     .replaceAll("'", "&#39;");
 }
 
+// --- Option B: divIcon (image marker controlled by CSS) ---
+const ICON_HTML_CACHE = {};
+
+function makeStoreDivIcon(iconKeyRaw) {
+  // Your filenames are lowercase like "ph.png", "cn.png", etc.
+  const key = String(iconKeyRaw || "general").trim().toLowerCase();
+
+  // Cache the HTML string so we're not rebuilding it for every marker
+  if (!ICON_HTML_CACHE[key]) {
+    ICON_HTML_CACHE[key] = `<img src="icons/${key}.png" class="store-icon-img" alt="">`;
+  }
+
+  return L.divIcon({
+    className: "store-divicon",     // CSS hook
+    html: ICON_HTML_CACHE[key],
+    iconSize: [34, 34],
+    iconAnchor: [17, 17],
+    popupAnchor: [0, -17],
+  });
+}
+
+
 function renderRecipeLinks(raw) {
   // Split on newlines if present, otherwise try to split on "http"
   const text = raw.replace(/\r/g, "").trim();
@@ -82,12 +104,14 @@ function renderRecipeLinks(raw) {
 
 
 //----ADD CANONICAL STORE HERE----//
-function cleanValue (v) {
-  if(v==null) return null;
+function cleanValue(v) {
+  if (v == null) return null;
   const s = String(v).trim();
-  if(!s) return NULL;
-  if(s.toLowerCase() ==='none') return null;
+  if (!s) return null;
+  if (s.toLowerCase() === "none") return null;
+  return s;
 }
+
 
 function firstNonEmpty(...vals) {
   for(const v of vals) {
@@ -102,10 +126,13 @@ function buildGroceryPopupHTML(p) {
 
   const regionText = p.region ? esc(p.region) : null;
 
-  const iconKey = p.icon_key ? esc(p.icon_key) : null;
-  const iconHtml = iconKey
-    ? `<img class="popup-flag" src="icons/${iconKey}.png" alt="${iconKey}">`
-    : "";
+const iconKeyRaw = p.icon_key ? String(p.icon_key).trim() : "";
+const iconKey = iconKeyRaw ? esc(iconKeyRaw.toLowerCase()) : null;
+
+const iconHtml = iconKey
+  ? `<img class="popup-flag" src="icons/${iconKey}.png" alt="${iconKey}">`
+  : "";
+
 
   const recipesRaw = p.recipes_out ? String(p.recipes_out) : "";
   const recipesHtml = recipesRaw ? renderRecipeLinks(recipesRaw) : "";
@@ -172,13 +199,13 @@ const LAYER_CONFIGS = [
     defaultVisible: true,
     pane: "points",
 
-    pointToLayer: (feature, latlng) =>
-      L.circleMarker(latlng, {
-        radius: 6,
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.9,
-      }),
+pointToLayer: (feature, latlng, cfg) => {
+  const p = feature.properties || {};
+  return L.marker(latlng, {
+    icon: makeStoreDivIcon(p.icon_key),
+    pane: cfg.pane, // ✅ now cfg exists
+  });
+},
 
     popup: {
       title: (p) => p.store_name || p.Name || "Grocery Store",
@@ -288,7 +315,7 @@ LAYER_CONFIGS.forEach((cfg) => {
         pane: cfg.pane,
         style: (feature) => styleForFeature(feature, cfg),
         pointToLayer: cfg.pointToLayer
-          ? (feature, latlng) => cfg.pointToLayer(feature, latlng)
+          ? (feature, latlng) => cfg.pointToLayer(feature, latlng, cfg) // ✅ pass cfg
           : undefined,
         onEachFeature: (feature, layer) => onEachFeature(feature, layer, cfg),
       });
