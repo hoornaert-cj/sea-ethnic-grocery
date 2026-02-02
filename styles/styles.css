@@ -133,111 +133,121 @@ body {
   }
 }
 
+/* style the icons */
+.leaflet-marker-icon img {
+  width: 2rem;
+  height:  2rem;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.25));
+}
+
+.store-icon-img {
+  transition: transform 120ms ease, filter 120ms ease;
+  transform-origin: center;
+  display: block;
+}
+
+.store-divicon:hover .store-icon-img {
+  transform: scale(1.25);
+}
+
+.store-divicon:is-selected .store-icon-img {
+  transform: scale(1.25);
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.50));
+}
 
 /*---- Style the popups ----*/
 /* Make Leaflet popups feel like a card */
-.sea-card{
-  font-family: Georgia, "Times New Roman", serif;
-  max-width: 16.25rem;
-  overflow: hidden;
+.leaflet-popup-content {
+  margin: 0;
+  width: auto !important;
 }
 
-.sea-card * {
-  overflow-wrap: anywhere;
-  word-break: break-word;
+.leaflet-popup-content-wrapper {
+  padding: 0;
+  border-radius: 1rem;
 }
 
-.sea-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:12px;
-  margin-bottom:14px;
+.leaflet-popup-close-button {
+  padding: .375rem .5rem
 }
 
-.sea-title{
+.sea-card {
+  padding: 1.375rem 1.375rem 1.125rem;
+  width: min(26.25rem, 86vw);
+  background: #f6f1ea;
+  color: #111;
+  box-sizing: border-box;
+}
+
+.sea-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+
+.sea-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .75rem;
+  margin-bottom: 1.125rem;
+}
+
+.sea-header img {
+  height: 2rem;
+  width: 2rem;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.25));
+}
+
+.sea header .popup-flag {
+  flex: 0 0 auto;
+  width: 2.875rem;
+  height: 1.875rem;
+}
+
+.sea-title {
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-weight: 900;
-  font-size: 1.75rem;
-  line-height: 1.0;
-}
-
-.popup-flag{
-  width: 42px;
-  height: 42px;
-  object-fit: cover;
-  border-radius: 3px;
-}
-
-.sea-rows{
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
-
-.sea-row{
-  display:grid;
-  grid-template-columns: 95px 1fr;
-  column-gap: 14px;
-  align-items:start;
-  min-width: 0;
-}
-
-.sea-label{
   font-weight: 800;
-  font-size: 1.375rem;
+  letter-spacing: .0313rem;
+  font-size: 1.5rem;
+  line-height: 0.95;
+  text-transform: uppercase;
 }
 
-.sea-value{
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 22px;
-  line-height: 1.25;
+.sea-row {
+  display: grid;
+  grid-template-columns: 8.75rem 1fr;
+  column-gap: 1rem;
+  align-items: start;
 }
 
-.sea-value a{
-  color: #4aa9b5;
+.sea-label {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 800;
+  font-size: 1.25rem;
+  line-height: 1.05;
+}
+
+.sea-value {
+  font-family:  Georgia, "Times New Roman", serif;
+  font-size: 1.25rem;
+  line-height: 1.1;
+}
+
+:root {
+  --sea-teal: #0aa6b4;
+}
+
+.sea-linkish,
+.sea-card a {
+  color: var(--sea-teal);
   text-decoration: underline;
-  font-weight: 500;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 6px;
 }
 
-.sea-notes{
-  color:#111;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+.sea-card a:hover {
+  filter: brightness(0.6);
 }
 
-.sea-footer{
-  margin-top: 16px;
-}
-
-.sea-directions{
-  display:inline-block;
-  margin-top: 6px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(0,0,0,0.15);
-  text-decoration: none;
-  font-weight: 700;
-  color: #2c7ea1;
-  background: rgba(44,126,161,0.08);
-}
-
-/* divIcon wrapper should be invisible */
-.store-divicon {
-  background: none;
-  border: none;
-}
-
-/* the actual image */
-.store-icon-img {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  display: block;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.22);
-}
-
-.store-icon-img:hover {
-  transform: scale(1.08);
-}
-
+/* I am on Post 6 */
