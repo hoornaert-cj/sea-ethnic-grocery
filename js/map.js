@@ -80,26 +80,33 @@ function makeStoreDivIcon(iconKeyRaw) {
 
 
 function renderRecipeLinks(raw) {
-  // Split on newlines if present, otherwise try to split on "http"
-  const text = raw.replace(/\r/g, "").trim();
-  if (!text) return "";
+  const text = String(raw || "").replace(/\r/g, "").trim();
+  if(!text) return "";
 
-  // If you already have newline-separated recipes, this works great.
-  const lines = text.includes("\n")
-    ? text.split("\n")
-    : text.split(/(?=https?:\/\/)/g).map(s => s.trim()); // crude fallback
+  const entries = text
+    .split(";")
+    .map(s => s.trim())
+    .filter(Boolean);
 
-  const items = [];
+  if (!entries.length) return "";
 
-  for (const line of lines) {
-    const m = line.match(/^(.*?)(https?:\/\/\S+)\s*$/);
-    if (!m) continue;
-    const title = esc(m[1].replace(/[:\-–]\s*$/, "").trim() || "Recipe");
-    const url = esc(m[2].trim());
-    items.push(`<div class="sea-recipe"><a href="${url}" target="_blank" rel="noopener">${title}</a></div>`);
-  }
+  const itemsHtml = entries.map(entry => {
+    const parts = entry.split("|").map(s => s.trim());
+    const label = parts[0] || "";
+    const url = parts[1] || "";
 
-  return items.join("");
+    if(!label) return "";
+
+    const inner = url
+      ? anchor(label, url)
+      : `<span class = "sea-plain">${esc(label)}</span>`;
+
+      return `<div class="sea-item">${inner}</div>`;
+  }).join("");
+
+  if(!itemsHtml.trim()) return "";
+
+  return `<div class="sea-list">${itemsHtml}</div>`;
 }
 
 

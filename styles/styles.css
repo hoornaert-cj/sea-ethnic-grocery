@@ -250,4 +250,23 @@ body {
   filter: brightness(0.6);
 }
 
-/* I am on Post 6 */
+.sea-list {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+
+/* .sea-list a {
+  color: var(--sea-teal);
+  text-decoration: underline;
+  text-decoration-thickness: .1875rem;
+  text-underline-offset: .375rem;
+} */
+
+.sea-item {
+  line-height: 1.15;
+}
+
+.sea-plain {
+  color: inherit;
+}
