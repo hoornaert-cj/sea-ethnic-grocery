@@ -81,33 +81,37 @@ function makeStoreDivIcon(iconKeyRaw) {
 
 function renderRecipeLinks(raw) {
   const text = String(raw || "").replace(/\r/g, "").trim();
-  if(!text) return "";
+  if (!text || text.toLowerCase() === "none") return "";
 
-  const entries = text
-    .split(";")
+  const lines = text
+    .split("\n")
     .map(s => s.trim())
     .filter(Boolean);
 
-  if (!entries.length) return "";
+  const urlRe = /(https?:\/\/\S+)/;
 
-  const itemsHtml = entries.map(entry => {
-    const parts = entry.split("|").map(s => s.trim());
-    const label = parts[0] || "";
-    const url = parts[1] || "";
+  const itemsHtml = lines
+    .map(line => {
+      const m = line.match(urlRe);
+      if (!m) return ""; // no url => skip
 
-    if(!label) return "";
+      const url = m[1].trim();
 
-    const inner = url
-      ? anchor(label, url)
-      : `<span class = "sea-plain">${esc(label)}</span>`;
+      // label = everything before the url
+      const label = line
+        .slice(0, m.index)
+        .replace(/[:\-–]\s*$/, "") // remove trailing ":" or "-" before url
+        .trim() || "Recipe";
 
-      return `<div class="sea-item">${inner}</div>`;
-  }).join("");
+      return `<div class="sea-item">${anchor(label, url)}</div>`;
+    })
+    .filter(Boolean)
+    .join("");
 
-  if(!itemsHtml.trim()) return "";
-
+  if (!itemsHtml) return "";
   return `<div class="sea-list">${itemsHtml}</div>`;
 }
+
 
 
 //----ADD CANONICAL STORE HERE----//

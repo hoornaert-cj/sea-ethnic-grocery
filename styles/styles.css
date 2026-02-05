@@ -199,10 +199,10 @@ body {
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.25));
 }
 
-.sea header .popup-flag {
+.sea-header .popup-flag {
   flex: 0 0 auto;
   width: 2.875rem;
-  height: 1.875rem;
+  height: 2.875rem;
 }
 
 .sea-title {
@@ -244,6 +244,7 @@ body {
   text-decoration: underline;
   text-decoration-thickness: 3px;
   text-underline-offset: 6px;
+  line-height: 1.5;
 }
 
 .sea-card a:hover {
