@@ -165,6 +165,16 @@ const iconHtml = iconKey
 
   const notes = p.notes_final ? esc(p.notes_final) : "";
 
+  const addressRaw = cleanValue(p.address_full);
+  const addressHtml = addressRaw
+  ? addressRaw
+      .split(/\n|,\s*/g)               // split on newline OR comma
+      .filter(Boolean)
+      .map(line => `<div>${esc(line.trim())}</div>`)
+      .join("")
+  : "";
+
+
   return `
     <div class="sea-card">
       <div class="sea-header">
@@ -173,7 +183,7 @@ const iconHtml = iconKey
       </div>
 
       <div class="sea-rows">
-        ${regionText ? rowHTML("Region:", `<span class="sea-linkish">${regionText}</span>`) : ""}
+        ${regionText ? rowHTML("Region:", `<span class="sea-text">${regionText}</span>`) : ""}
 
         ${recipesHtml ? rowHTML("Recipes:", recipesHtml) : ""}
 
@@ -186,12 +196,15 @@ const iconHtml = iconKey
       </div>
 
       ${directions ? `
-        <div class="sea-footer">
-          <a class="sea-directions" href="${esc(directions)}" target="_blank" rel="noopener">
-            Get Directions
-          </a>
-        </div>
-      ` : ""}
+  <div class="sea-footer sea-footer--card">
+    ${addressHtml ? `<div class="sea-address">${addressHtml}</div>` : `<div></div>`}
+
+    <a class="sea-directions" href="${esc(directions)}" target="_blank" rel="noopener" aria-label="Get directions">
+      <span class="sea-dir-icon" aria-hidden="true"></span>
+      <span class="sea-dir-label">Get Directions</span>
+    </a>
+  </div>
+` : ""}
     </div>
   `;
 }
