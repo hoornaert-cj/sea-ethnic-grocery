@@ -271,3 +271,27 @@ body {
 .sea-plain {
   color: inherit;
 }
+
+.sea-recipes {
+  position: relative;
+  padding-right: 3.375rem;
+}
+
+.sea-star {
+  position: absolute;
+  right: 0;
+  top: 6px;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: #f2c318;
+  transform: rotate(10deg);
+
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  line-height: 1;
+  color: #111;
+  font-weight: 900;
+}
+

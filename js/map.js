@@ -79,7 +79,7 @@ function makeStoreDivIcon(iconKeyRaw) {
 }
 
 
-function renderRecipeLinks(raw) {
+function renderRecipeLinks(raw, hasRecommended) {
   const text = String(raw || "").replace(/\r/g, "").trim();
   if (!text || text.toLowerCase() === "none") return "";
 
@@ -93,14 +93,12 @@ function renderRecipeLinks(raw) {
   const itemsHtml = lines
     .map(line => {
       const m = line.match(urlRe);
-      if (!m) return ""; // no url => skip
+      if (!m) return "";
 
       const url = m[1].trim();
-
-      // label = everything before the url
       const label = line
         .slice(0, m.index)
-        .replace(/[:\-–]\s*$/, "") // remove trailing ":" or "-" before url
+        .replace(/[:\-–]\s*$/, "")
         .trim() || "Recipe";
 
       return `<div class="sea-item">${anchor(label, url)}</div>`;
@@ -108,10 +106,22 @@ function renderRecipeLinks(raw) {
     .filter(Boolean)
     .join("");
 
+  // ✅ If there are no items, don't render anything (and no star either)
   if (!itemsHtml) return "";
-  return `<div class="sea-list">${itemsHtml}</div>`;
-}
 
+  const starHtml = hasRecommended ? `
+  <span class="sea-star" aria-label="recommended" title="recommended dish">
+    ★
+  </span>
+` : "";
+
+  return `
+    <div class="sea-recipes">
+      <div class="sea-list">${itemsHtml}</div>
+      ${starHtml}
+    </div>
+  `;
+}
 
 
 //----ADD CANONICAL STORE HERE----//
@@ -122,7 +132,6 @@ function cleanValue(v) {
   if (s.toLowerCase() === "none") return null;
   return s;
 }
-
 
 function firstNonEmpty(...vals) {
   for(const v of vals) {
@@ -146,7 +155,9 @@ const iconHtml = iconKey
 
 
   const recipesRaw = p.recipes_out ? String(p.recipes_out) : "";
-  const recipesHtml = recipesRaw ? renderRecipeLinks(recipesRaw) : "";
+  const hasRecommended = Boolean(cleanValue(p.recipes_out));
+  console.log("REC STAR?", p.store_name_final, "recipes_recommended =", p.recipes_recommended, "->", hasRecommended);
+  const recipesHtml = recipesRaw ? renderRecipeLinks(recipesRaw, hasRecommended) : "";
 
   const flyer = p.flyer_url_final || null;
   const ordering = p.ordering_url || null;
