@@ -34,17 +34,20 @@ L.tileLayer(PROJECT.tileUrl, PROJECT.tileOptions).addTo(map);
 const overlayLayers = {};
 let legendContainer = null;
 
-function formatValue(val, decimals = 1) {
-  const n = Number(val);
-  if (val == null) return null;
-  return isNaN(n) ? String(val) : n.toFixed(decimals);
-}
+let regionFilter = "ALL";
+let regionOptions = [];
+let groceriesGeojson = null;
+let groceriesLayer = null;
 
-function linkRow(label, url, text = null) {
-  if (!url) return "";
-  const safeUrl = esc(url);
-  const safeText = esc(text || label);
-  return `<div class="popup-row"><a href="${safeUrl}" target="_blank" rel="noopener">${safeText}</a></div>`;
+function makeLayerFromGeojson(geojson, cfg) {
+  return L.geoJSON(geojson, {
+    pane: cfg.pane,
+    style: (feature) => styleForFeature(feature, cfg),
+    pointToLayer: cfg.pointToLayer
+      ? (feature, latlng) => cfg.pointToLayer(feature, latlng, cfg)
+      : undefined,
+    onEachFeature: (feature, layer) => onEachFeature(feature, layer, cfg),
+  });
 }
 
 function esc(s) {
@@ -123,6 +126,39 @@ function renderRecipeLinks(raw, hasRecommended) {
   `;
 }
 
+function buildGroceriesLayer(cfg) {
+  if (!groceriesGeojson) return L.layerGroup(); // safety
+
+  const geo = (regionFilter === "ALL")
+    ? groceriesGeojson
+    : {
+        ...groceriesGeojson,
+        features: groceriesGeojson.features.filter(f =>
+          (f.properties?.region || "").trim() === regionFilter
+        ),
+      };
+
+  return makeLayerFromGeojson(geo, cfg);
+}
+
+
+function refreshGroceriesLayer() {
+  const cfg = LAYER_CONFIGS.find(c => c.id === "groceries");
+  if (!cfg || !groceriesGeojson) return;
+
+  const wasOn = groceriesLayer && map.hasLayer(groceriesLayer);
+  if (wasOn) map.removeLayer(groceriesLayer);
+
+  groceriesLayer = buildGroceriesLayer(cfg);
+  overlayLayers[cfg.id] = groceriesLayer;
+
+  if (wasOn) groceriesLayer.addTo(map);
+
+  rebuildLegend(); // optional
+}
+
+
+
 
 //----ADD CANONICAL STORE HERE----//
 function cleanValue(v) {
@@ -133,13 +169,6 @@ function cleanValue(v) {
   return s;
 }
 
-function firstNonEmpty(...vals) {
-  for(const v of vals) {
-    const cleaned = cleanValue(v);
-    if(cleaned) return cleaned;
-  }
-  return null;
-}
 
 function buildGroceryPopupHTML(p) {
   const name = p.store_name_final ? esc(p.store_name_final) : "Grocery Store";
@@ -153,10 +182,8 @@ const iconHtml = iconKey
   ? `<img class="popup-flag" src="icons/${iconKey}.png" alt="${iconKey}">`
   : "";
 
-
   const recipesRaw = p.recipes_out ? String(p.recipes_out) : "";
   const hasRecommended = Boolean(cleanValue(p.recipes_out));
-  console.log("REC STAR?", p.store_name_final, "recipes_recommended =", p.recipes_recommended, "->", hasRecommended);
   const recipesHtml = recipesRaw ? renderRecipeLinks(recipesRaw, hasRecommended) : "";
 
   const flyer = p.flyer_url_final || null;
@@ -165,14 +192,48 @@ const iconHtml = iconKey
 
   const notes = p.notes_final ? esc(p.notes_final) : "";
 
-  const addressRaw = cleanValue(p.address_full);
-  const addressHtml = addressRaw
-  ? addressRaw
-      .split(/\n|,\s*/g)               // split on newline OR comma
-      .filter(Boolean)
-      .map(line => `<div>${esc(line.trim())}</div>`)
-      .join("")
-  : "";
+const addressRaw = cleanValue(p.address_full);
+
+const addressHtml = (() => {
+  if (!addressRaw) return "";
+
+  const s = String(addressRaw).replace(/\r/g, "").trim();
+
+  // Split on newline if present, otherwise commas
+  const parts = s.includes("\n")
+    ? s.split("\n").map(x => x.trim()).filter(Boolean)
+    : s.split(",").map(x => x.trim()).filter(Boolean);
+
+  if (!parts.length) return "";
+
+  // Assume last part looks like: "ON M1G 1R2"
+  const last = parts[parts.length - 1] || "";
+  const m = last.match(/^([A-Za-z]{2})\s+(.+)$/);
+  const prov = m ? m[1] : "";
+  const postal = m ? m[2] : "";
+
+  // City is usually the second-last part if we have at least 2 parts
+  const city = parts.length >= 2 ? parts[parts.length - 2] : "";
+
+  // Everything before city+provPostal is the street/address line
+  const streetParts = parts.slice(0, Math.max(0, parts.length - 2));
+  const street = streetParts.join(", ");
+
+  const lines = [];
+  if (street) lines.push(street);
+
+  // Put City + Province on the same line (like the mock)
+  if (city && prov) lines.push(`${city} ${prov}`);
+  else if (city) lines.push(city);
+  else if (prov) lines.push(prov);
+
+  // Postal code on its own line
+  if (postal) lines.push(postal);
+  else if (last && !prov) lines.push(last);
+
+  return lines.map(line => `<div>${esc(line)}</div>`).join("");
+})();
+
 
 
   return `
@@ -257,17 +318,6 @@ pointToLayer: (feature, latlng, cfg) => {
       text: "Tap a point to view store details.",
     },
   },
-
-  // Optional: a neighbourhood boundary polygon layer
-  // {
-  //   id: "areas",
-  //   name: "Neighbourhoods",
-  //   url: "data/neighbourhoods.geojson",
-  //   defaultVisible: false,
-  //   pane: "basePolys",
-  //   style: () => ({ color: "#000", weight: 1, fillOpacity: 0 }),
-  //   popup: { title: "name", fields: [] },
-  // },
 ];
 
 function styleForFeature(feature, cfg) {
@@ -287,11 +337,14 @@ const legendControl = L.control({ position: "topright" });
 
 legendControl.onAdd = function () {
   const div = L.DomUtil.create("div", "layer-legend");
-  div.innerHTML = `
-    <h3>SEA Map</h3>
-    <h4>Layers</h4>
-    <form id="layer-legend-form"></form>
-  `;
+div.innerHTML = `
+  <h3>Ethnic Grocery Stores</h3>
+
+  <div class="legend-filter">
+    <div class="legend-filter-label">Filter by region</div>
+    <select id="region-filter"></select>
+  </div>
+`;
   L.DomEvent.disableClickPropagation(div);
   legendContainer = div;
   return div;
@@ -300,60 +353,59 @@ legendControl.onAdd = function () {
 legendControl.addTo(map);
 
 function rebuildLegend() {
-  const form = document.getElementById("layer-legend-form");
-  if (!form) return;
-  form.innerHTML = "";
+  const select = document.getElementById("region-filter");
+  if (!select) return;
 
-  LAYER_CONFIGS.forEach((cfg) => {
-    const layer = overlayLayers[cfg.id];
-    if (!layer) return;
+  // Rebuild options
+  select.innerHTML = "";
+  const opts = regionOptions.length ? regionOptions : ["ALL"];
 
-    const container = document.createElement("div");
-    container.className = "layer-entry";
+  for (const val of opts) {
+    const opt = document.createElement("option");
+    opt.value = val;
+    opt.textContent = (val === "ALL") ? "All regions" : val;
+    opt.selected = (val === regionFilter);
+    select.appendChild(opt);
+  }
 
-    const wrapper = document.createElement("label");
-    wrapper.className = "layer-toggle";
-
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.value = cfg.id;
-    checkbox.checked = map.hasLayer(layer);
-    checkbox.addEventListener("change", (e) => {
-      if (e.target.checked) map.addLayer(layer);
-      else map.removeLayer(layer);
-    });
-
-    const text = document.createElement("span");
-    text.textContent = cfg.name;
-
-    wrapper.appendChild(checkbox);
-    wrapper.appendChild(text);
-    container.appendChild(wrapper);
-
-    if (cfg.legend?.type === "note") {
-      const note = document.createElement("div");
-      note.className = "layer-note";
-      note.textContent = cfg.legend.text;
-      container.appendChild(note);
-    }
-
-    form.appendChild(container);
-  });
+  // Avoid stacking multiple handlers on repeated rebuilds
+  select.onchange = null;
+  select.onchange = (e) => {
+    regionFilter = e.target.value;
+    refreshGroceriesLayer();
+  };
 }
 
-// -------- Load layers --------
+ // -------- Load layers --------
 LAYER_CONFIGS.forEach((cfg) => {
   fetch(cfg.url)
     .then((r) => r.json())
     .then((geojson) => {
-      const layer = L.geoJSON(geojson, {
-        pane: cfg.pane,
-        style: (feature) => styleForFeature(feature, cfg),
-        pointToLayer: cfg.pointToLayer
-          ? (feature, latlng) => cfg.pointToLayer(feature, latlng, cfg) // ✅ pass cfg
-          : undefined,
-        onEachFeature: (feature, layer) => onEachFeature(feature, layer, cfg),
-      });
+
+      // ---- Special handling for groceries (so we can filter it) ----
+      if (cfg.id === "groceries") {
+        groceriesGeojson = geojson; // store raw data once
+
+        // build region dropdown options once
+        const set = new Set();
+        geojson.features.forEach(f => {
+          const r = (f.properties?.region || "").trim();
+          if (r) set.add(r);
+        });
+        regionOptions = ["ALL", ...Array.from(set).sort()];
+
+        // create the *filtered* layer (based on regionFilter)
+        groceriesLayer = buildGroceriesLayer(cfg);
+
+        overlayLayers[cfg.id] = groceriesLayer;
+        if (cfg.defaultVisible) groceriesLayer.addTo(map);
+
+        rebuildLegend();
+        return; //
+      }
+
+      // ---- Normal handling for other layers ----
+  const layer = makeLayerFromGeojson(geojson, cfg);
 
       overlayLayers[cfg.id] = layer;
       if (cfg.defaultVisible) layer.addTo(map);
