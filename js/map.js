@@ -38,6 +38,7 @@ let regionFilter = "ALL";
 let regionOptions = [];
 let groceriesGeojson = null;
 let groceriesLayer = null;
+let regionGroups = {};
 
 function makeLayerFromGeojson(geojson, cfg) {
   return L.geoJSON(geojson, {
@@ -80,7 +81,6 @@ function makeStoreDivIcon(iconKeyRaw) {
     popupAnchor: [0, -17],
   });
 }
-
 
 function renderRecipeLinks(raw, hasRecommended) {
   const text = String(raw || "").replace(/\r/g, "").trim();
@@ -141,7 +141,6 @@ function buildGroceriesLayer(cfg) {
   return makeLayerFromGeojson(geo, cfg);
 }
 
-
 function refreshGroceriesLayer() {
   const cfg = LAYER_CONFIGS.find(c => c.id === "groceries");
   if (!cfg || !groceriesGeojson) return;
@@ -157,9 +156,6 @@ function refreshGroceriesLayer() {
   rebuildLegend(); // optional
 }
 
-
-
-
 //----ADD CANONICAL STORE HERE----//
 function cleanValue(v) {
   if (v == null) return null;
@@ -168,7 +164,6 @@ function cleanValue(v) {
   if (s.toLowerCase() === "none") return null;
   return s;
 }
-
 
 function buildGroceryPopupHTML(p) {
   const name = p.store_name_final ? esc(p.store_name_final) : "Grocery Store";
@@ -233,8 +228,6 @@ const addressHtml = (() => {
 
   return lines.map(line => `<div>${esc(line)}</div>`).join("");
 })();
-
-
 
   return `
     <div class="sea-card">
@@ -318,6 +311,22 @@ pointToLayer: (feature, latlng, cfg) => {
       text: "Tap a point to view store details.",
     },
   },
+
+    {
+    id: "scarborough_bdry",
+    name: "Scarborough boundary",
+    url: "data/scarborough_bdry.geojson",
+    defaultVisible: true,
+    pane: "basePolys",
+
+    style: () => ({
+      color: "#111",
+      weight: 2,
+      opacity: 0.9,
+      fillOpacity: 0,
+      dashArray: "6 6",
+    }),
+  },
 ];
 
 function styleForFeature(feature, cfg) {
@@ -329,7 +338,7 @@ function onEachFeature(feature, layer, cfg) {
   const props = feature.properties;
   if (!props) return;
   const html = buildGroceryPopupHTML(props);
-  layer.bindPopup(html, { maxWidth: 320 });
+  layer.bindPopup(html, { maxWidth: 520});
 }
 
 // -------- Legend UI --------
@@ -337,43 +346,150 @@ const legendControl = L.control({ position: "topright" });
 
 legendControl.onAdd = function () {
   const div = L.DomUtil.create("div", "layer-legend");
-div.innerHTML = `
-  <h3>Ethnic Grocery Stores</h3>
 
-  <div class="legend-filter">
-    <div class="legend-filter-label">Filter by region</div>
-    <select id="region-filter"></select>
-  </div>
-`;
+  div.innerHTML = `
+    <button class="legend-toggle" type="button" aria-expanded="false">
+      Filters
+    </button>
+
+    <div class="legend-panel" aria-hidden="true">
+      <div class="legend-panel-header">
+        <h3>Ethnic Grocery Stores</h3>
+        <button class="legend-close" type="button" aria-label="Close filters">✕</button>
+      </div>
+
+      <div class="legend-filter">
+        <div class="legend-filter-label">Filter by region</div>
+        <select id="region-filter"></select>
+      </div>
+    </div>
+  `;
+
   L.DomEvent.disableClickPropagation(div);
   legendContainer = div;
+
+  // Toggle behavior
+  const toggleBtn = div.querySelector(".legend-toggle");
+  const panel = div.querySelector(".legend-panel");
+  const closeBtn = div.querySelector(".legend-close");
+
+  const openPanel = () => {
+    div.classList.add("is-open");
+    toggleBtn.setAttribute("aria-expanded", "true");
+    panel.setAttribute("aria-hidden", "false");
+  };
+
+  const closePanel = () => {
+    div.classList.remove("is-open");
+    toggleBtn.setAttribute("aria-expanded", "false");
+    panel.setAttribute("aria-hidden", "true");
+  };
+
+  toggleBtn.addEventListener("click", () => {
+    div.classList.contains("is-open") ? closePanel() : openPanel();
+  });
+
+  closeBtn.addEventListener("click", closePanel);
+
+  // Optional: close when clicking map
+  map.on("click", closePanel);
+
   return div;
 };
 
 legendControl.addTo(map);
 
+// Mobile legend toggle button
+const legendToggleControl = L.control({ position: "bottomright" });
+
+legendToggleControl.onAdd = function () {
+  const div = L.DomUtil.create("div", "legend-toggle-btn leaflet-bar");
+  const a = L.DomUtil.create("a", "", div);
+  a.href = "#";
+  a.title = "Filters";
+  a.setAttribute("aria-label", "Open filters");
+  a.innerHTML = "☰"; // or "Filters"
+
+  L.DomEvent.disableClickPropagation(div);
+  L.DomEvent.on(a, "click", (e) => {
+    L.DomEvent.preventDefault(e);
+
+    const panel = document.querySelector(".layer-legend");
+    if (panel) panel.classList.toggle("is-open");
+  });
+
+  return div;
+};
+
+legendToggleControl.addTo(map);
+
 function rebuildLegend() {
   const select = document.getElementById("region-filter");
   if (!select) return;
 
-  // Rebuild options
   select.innerHTML = "";
-  const opts = regionOptions.length ? regionOptions : ["ALL"];
 
-  for (const val of opts) {
-    const opt = document.createElement("option");
-    opt.value = val;
-    opt.textContent = (val === "ALL") ? "All regions" : val;
-    opt.selected = (val === regionFilter);
-    select.appendChild(opt);
+  // Always include "All regions" first
+  const allOpt = document.createElement("option");
+  allOpt.value = "ALL";
+  allOpt.textContent = "All regions";
+  select.appendChild(allOpt);
+
+  // If we don't have groups yet, fall back to flat regionOptions
+  if (!regionGroups || !Object.keys(regionGroups).length) {
+    const opts = regionOptions.length ? regionOptions : [];
+    for (const val of opts) {
+      if (val === "ALL") continue;
+      const opt = document.createElement("option");
+      opt.value = val;
+      opt.textContent = val;
+      select.appendChild(opt);
+    }
+  } else {
+    // Build optgroups: region_group -> regions
+    for (const [groupName, regions] of Object.entries(regionGroups)) {
+      const og = document.createElement("optgroup");
+      og.label = groupName;
+
+      for (const region of regions) {
+        const opt = document.createElement("option");
+        opt.value = region;
+        opt.textContent = region;
+        og.appendChild(opt);
+      }
+
+      select.appendChild(og);
+    }
   }
 
-  // Avoid stacking multiple handlers on repeated rebuilds
-  select.onchange = null;
+  // Set selection
+  select.value = regionFilter;
+
+  // One onchange handler (no stacking)
   select.onchange = (e) => {
     regionFilter = e.target.value;
     refreshGroceriesLayer();
   };
+}
+
+function buildRegionGroupsFromGeojson(geojson) {
+  const groups = {};
+
+  (geojson.features || []).forEach(f => {
+    const p = f.properties || {};
+    const group = String(p.region_group || "Other").trim();
+    const region = String(p.region || "").trim();
+    if (!region) return;
+
+    (groups[group] ||= new Set()).add(region);
+  });
+
+  // convert sets to sorted arrays
+  const out = {};
+  Object.keys(groups).sort().forEach(g => {
+    out[g] = Array.from(groups[g]).sort();
+  });
+  return out;
 }
 
  // -------- Load layers --------
@@ -384,7 +500,8 @@ LAYER_CONFIGS.forEach((cfg) => {
 
       // ---- Special handling for groceries (so we can filter it) ----
       if (cfg.id === "groceries") {
-        groceriesGeojson = geojson; // store raw data once
+        groceriesGeojson = geojson;
+        regionGroups = buildRegionGroupsFromGeojson(geojson);
 
         // build region dropdown options once
         const set = new Set();
@@ -392,7 +509,8 @@ LAYER_CONFIGS.forEach((cfg) => {
           const r = (f.properties?.region || "").trim();
           if (r) set.add(r);
         });
-        regionOptions = ["ALL", ...Array.from(set).sort()];
+        const groupedRegions = buildRegionGroupsFromGeojson(geojson.features);
+        regionOptions = groupedRegions;
 
         // create the *filtered* layer (based on regionFilter)
         groceriesLayer = buildGroceriesLayer(cfg);
