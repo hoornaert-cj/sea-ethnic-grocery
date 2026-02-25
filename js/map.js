@@ -1,7 +1,7 @@
 // js/map.js
 
 const PROJECT = {
-  initialCenter: [43.7766, -79.2318],
+  initialCenter: [43.7630, -79.23697],
   initialZoom: 12,
   minZoom: 10,
   tileUrl: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -39,6 +39,8 @@ let regionOptions = [];
 let groceriesGeojson = null;
 let groceriesLayer = null;
 let regionGroups = {};
+const suggestionsUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSca4fuJbRcvuTP8ze3OnTY0DA6LMXWZmzhUojRb2fXsAeReFw/viewform?usp=header';
+
 
 function makeLayerFromGeojson(geojson, cfg) {
   return L.geoJSON(geojson, {
@@ -364,7 +366,7 @@ legendControl.onAdd = function () {
             <p>If any locations or information is out of date, please email scarbenvasc@gmail.com and we will update it ASAP! </p>
             <p>By Hafeez A. @trainguy89 on Twitter Updated by Christina Dinh (Oct 2024) </p>
             <p>DISCLAIMERS: Asia-Wide Supermarkets, although Chinese, generally serve every Asian ethnicity and stock almost all international products. Ethnicities are hard to categorize, especially because there's a lot of cultural overlap, but I tried my best to categorize them. Ethnicities of stores were identified through their website on what they sell or reviews by customers so some stores for example, may serve more than one ethnicity even if it may not be marked as such. Restaurants are only on this list if they offer grocery or ethnic specialty items to go (e.g. Snacks, Meats). Stores that are not on Google Maps will not be on this map.</p>
-            <p><a class="legend-link" href="YOUR_FORM_URL" target="_blank" rel="noopener">Suggest an update</a></p>
+            <p><a class="legend-link" href="${suggestionsUrl}" target="_blank" rel="noopener">Suggest an update</a></p>
         </div>
       </details>
     </div>
