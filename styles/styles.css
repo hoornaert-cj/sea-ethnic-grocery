@@ -11,7 +11,7 @@ body {
 }
 
 .layer-legend {
-  background: #ffffff;
+  background: #f6f1ea;
   padding: 0.5rem 0.625rem;
   border-radius: 4px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
@@ -35,27 +35,6 @@ body {
   cursor: pointer;
 }
 
-/* .layer-legend input[type="checkbox"] {
-  cursor: pointer;
-} */
-
-/* .layer-entry {
-  margin-bottom: 0.375rem;
-} */
-
-/* .layer-toggle {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-} */
-
-/* .layer-classes {
-  margin-left: 1.125rem;
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
-} */
-
 .layer-classes-row {
   display: flex;
   align-items: center;
@@ -76,14 +55,25 @@ body {
   background-color: #747575;
 }
 
-/* .layer-note {
-  font-size: 11px;
-  color: #555;
-  margin: 0.25rem 0 2px;
-} */
+.legend-about {
+  background: #efe7dd;
+  margin-left: -0.63rem;
+  margin-right: -0.63rem;
+  margin-bottom: -0.5rem;
+  border-bottom-left-radius: .25rem;
+  border-bottom-right-radius: .25rem;
+}
+
+.legend-about-summary {
+  padding: 0.75rem 0.75rem 0.5rem;
+}
+
+.legend-about-body {
+  padding: 0 0.75rem 0.75rem;
+}
 
 .legend-filter {
-  margin: .5rem 0 1rem;
+  margin: 0.5rem 1rem 1.75rem 1rem;
 }
 
 .legend-filter-label {
@@ -124,7 +114,7 @@ body {
     width: 100%;
   }
 
-  .legend-toggle-btn {
+  /* .legend-toggle-btn {
     display: block;
     position: absolute;
     bottom: 12px;
@@ -144,7 +134,7 @@ body {
     font-size: .75rem;
     box-shadow: 0 1px 4px rgba(0,0,0,0.3);
     color: #333;
-  }
+  } */
 }
 
 /* style the icons */
@@ -419,10 +409,10 @@ body {
   color: var(--sea-teal);
 }
 
-/* Desktop: show panel, hide toggle */
-/* .layer-legend .legend-toggle {
-  display: none;
-} */
+  .legend-close {
+    display: none;
+  }
+
 
 .legend-toggle-btn {
   display: none;

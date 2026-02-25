@@ -348,11 +348,7 @@ legendControl.onAdd = function () {
   const div = L.DomUtil.create("div", "layer-legend");
 
   div.innerHTML = `
-    <button class="legend-toggle" type="button" aria-expanded="false">
-      Filters
-    </button>
-
-    <div class="legend-panel" aria-hidden="true">
+    <div class="legend-panel">
       <div class="legend-panel-header">
         <h3>Ethnic Grocery Stores</h3>
         <button class="legend-close" type="button" aria-label="Close filters">✕</button>
@@ -362,37 +358,20 @@ legendControl.onAdd = function () {
         <div class="legend-filter-label">Filter by region</div>
         <select id="region-filter"></select>
       </div>
+      <details class="legend-about">
+          <summary class="legend-about-summary">About</summary>
+          <div class="legend-about-body">
+            <p>If any locations or information is out of date, please email scarbenvasc@gmail.com and we will update it ASAP! </p>
+            <p>By Hafeez A. @trainguy89 on Twitter Updated by Christina Dinh (Oct 2024) </p>
+            <p>DISCLAIMERS: Asia-Wide Supermarkets, although Chinese, generally serve every Asian ethnicity and stock almost all international products. Ethnicities are hard to categorize, especially because there's a lot of cultural overlap, but I tried my best to categorize them. Ethnicities of stores were identified through their website on what they sell or reviews by customers so some stores for example, may serve more than one ethnicity even if it may not be marked as such. Restaurants are only on this list if they offer grocery or ethnic specialty items to go (e.g. Snacks, Meats). Stores that are not on Google Maps will not be on this map.</p>
+            <p><a class="legend-link" href="YOUR_FORM_URL" target="_blank" rel="noopener">Suggest an update</a></p>
+        </div>
+      </details>
     </div>
   `;
 
   L.DomEvent.disableClickPropagation(div);
   legendContainer = div;
-
-  // Toggle behavior
-  const toggleBtn = div.querySelector(".legend-toggle");
-  const panel = div.querySelector(".legend-panel");
-  const closeBtn = div.querySelector(".legend-close");
-
-  const openPanel = () => {
-    div.classList.add("is-open");
-    toggleBtn.setAttribute("aria-expanded", "true");
-    panel.setAttribute("aria-hidden", "false");
-  };
-
-  const closePanel = () => {
-    div.classList.remove("is-open");
-    toggleBtn.setAttribute("aria-expanded", "false");
-    panel.setAttribute("aria-hidden", "true");
-  };
-
-  toggleBtn.addEventListener("click", () => {
-    div.classList.contains("is-open") ? closePanel() : openPanel();
-  });
-
-  closeBtn.addEventListener("click", closePanel);
-
-  // Optional: close when clicking map
-  map.on("click", closePanel);
 
   return div;
 };
