@@ -1,89 +1,78 @@
-README — Toronto Renter Housing Cost Burden Map
-------------------------------------------------
+Scarborough Ethnic Grocery Store Map
+Developed for the Scarborough Environmental Association (SEA)
 
-Project Title:
-Toronto Renter Housing Cost Burden (Interactive Web Map)
+Overview
 
-Author / Developer:
-Christopher [Your Last Name]
-Freelance GIS & Web Mapping Specialist
-Email: [your email]
-Website: [your portfolio URL]
+This project is a web-based interactive map showing ethnic grocery stores in Scarborough.
+The map is built using Leaflet.js and loads store locations from a GeoJSON dataset.
 
-Partner Organization:
-Social and Economic Analysis (SEA)
+The map is designed to run as a static webpage, meaning it can be hosted on any standard web server without additional software.
 
-------------------------------------------------
-PROJECT OVERVIEW
+File Structure
+--index.html
+Main webpage that loads the map.
 
-This interactive Leaflet map visualizes renter housing cost burden across Toronto. 
-It combines data at the ward and census tract levels to show areas where renter 
-households face higher financial vulnerability.
 
-The map allows users to:
-- View the percentage of renter households spending 30%+ of income on shelter (census tract)
-- Compare overall renter household percentages
-- Identify wards with higher concentrations of housing cost burden
-- Estimate the proportion of total households most at risk of unaffordable housing
+--data/
 
-------------------------------------------------
-FILE STRUCTURE
+Contains the store dataset in GeoJSON format.
 
-index.html
-│
-├── js/
-│   └── map.js
-│
-├── styles/
-│   └── styles.css
-│
-└── data/
-    ├── ward-info.geojson
-    ├── shelter.geojson
-    └── ward-points.geojson
+Example:
 
-------------------------------------------------
-HOW TO USE
+data/scarborough_grocery_stores.geojson
 
-1. Unzip the folder.
-2. To preview locally, open index.html in any modern web browser.
-3. To publish on your site:
-   - Upload all files to the same directory on the SEA web server.
-   - Keep the folder structure intact.
-   - Access the map by visiting the uploaded index.html page.
 
-------------------------------------------------
-DATA SOURCES
+--js/
 
-- City of Toronto Open Data Portal — Ward Boundaries (2022)
-- Statistics Canada — 2021 Census of Population (Census Tract data)
-- OpenStreetMap — Base map tiles (© OpenStreetMap contributors)
+Javascript controlling the map behavior and popups.
 
-Derived and processed using QGIS 3.34 and Leaflet.js.
 
-------------------------------------------------
-DATA NOTES
+--styles/
 
-- “Renter Households Spending ≥30%” (ct_30_pct_plus_inc):
-  Percentage of renter households spending 30% or more of income on shelter costs.
+CSS styling for the map.
 
-- “Renter Households (%)” (ct_percent_renters):
-  Percentage of dwellings occupied by renters.
 
-- “Estimated Risk” (optional field):
-  Product of the two percentages above, representing households most at risk.
+--icons/
 
-------------------------------------------------
-MAP USE TIPS
+Marker icons used for the different cuisines/regions.
 
-- Use the legend (☰ button on mobile) to toggle layers.
-- Toggle off the “Wards” layer to click and view Census Tract information.
-- Click a feature to see key housing indicators.
 
-------------------------------------------------
-ATTRIBUTION
+Hosting the Map
 
-© City of Toronto Open Data (2022)
-© Statistics Canada, 2021 Census of Population
-© OpenStreetMap contributors
-Map design and compilation © 2025 Christopher Hoornaert
+To host the map:
+
+-Upload the entire folder to the website server
+
+-Ensure the folder structure is preserved
+
+-Open:
+
+/folder-name/index.html
+
+
+Example:
+
+https://example.org/scarborough-grocery-map/
+
+No server-side software is required.
+
+Updating the Dataset
+
+The store locations are stored in:
+
+data/ethnic-grocery.geojson
+
+
+Technologies Used
+
+Leaflet.js
+OpenStreetMap basemap
+GeoJSON spatial data
+
+Contact
+
+For questions about the map or dataset, please contact:
+
+Christopher Hoornaert
+cj.hoornaert@gmail.com
+(Project developer)
